@@ -1,0 +1,9 @@
+# Directories
+/venv
+
+# Databases
+db.*
+
+# Python bytecode
+*.pyc
+**/__pycache__/
