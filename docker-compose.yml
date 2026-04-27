@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Название нашего сервиса (бэкенда)
+  web:
+    # 1. Сборка: указываем текущую папку
+    build: 
+      context: .
+    
+    # 2. Имя контейнера, которое ты будешь видеть в списке процессов
+    container_name: webplatform_backend_container
+    
+    # 3. Порты: связываем твой MacBook (8000) с контейнером (8000)
+    ports:
+      - "8000:8000"
+      
+    # 4. ТОМА (Volumes): Самое важное для разработки
+    volumes:
+      - .:/app              # Синхронизация кода: меняешь в Cursor — меняется в Docker
+      - /app/venv/          # Изоляция: не даем контейнеру юзать локальный venv с Mac
+      
+    # 5. Переменные окружения для Django
+    environment:
+      - DEBUG=1
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - TZ=Europe/Moscow    # Чтобы время в логах было твоим
+      
+    # 6. Режим работы терминала (нужен для отладки и цветных логов)
+    stdin_open: true
+    tty: true
+    
+    # 7. Автоматический перезапуск, если что-то упадет
+    restart: unless-stopped
+
+    # 8. Проверка "здоровья": Docker будет знать, когда Django реально готов к работе
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
