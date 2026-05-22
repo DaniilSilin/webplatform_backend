@@ -4,29 +4,32 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import UserProfile
-from .serializers import UserProfileSerializer, RegisterSerializer
+from .serializers import UserProfileSerializer, RegisterSerializer, VerifyEmailSerializer
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from .services import send_mail_on_email_verify, generate_email_verification_link, check_captcha
 
-class RegisterView(viewsets.ModelViewSet):
-    serializer_class = RegisterSerializer
+
+class VerifyEmailView(viewsets.ModelViewSet):
+    serializer_class = VerifyEmailSerializer
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        username = serializer.data["username"]
         email = serializer.data["email"]
-        password = serializer.data["password"]
+        token = serializer.data["token"]
 
-        user = UserProfile.objects.create_user(
-            username=username,
-            email=email,
-            password=password,
-            is_active=False
-        )
+        if not check_captcha(token, request):
+            return Response(
+                {"error": "Вы не прошли проверку на робота!"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        verify_link = generate_email_verification_link(email)
+        send_mail_on_email_verify(email, verify_link)
 
         return Response({"detail": "Account successfully created."}, status=status.HTTP_201_CREATED)
 

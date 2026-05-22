@@ -7,3 +7,9 @@ db.*
 # Python bytecode
 *.pyc
 **/__pycache__/
+
+# Django Migrations
+**/migrations
+
+# .env file
+/.env
