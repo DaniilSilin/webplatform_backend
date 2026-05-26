@@ -19,10 +19,11 @@ def generate_snowflake_creation_id() -> int:
     passed_ms = ms_timestamp - settings.MY_APP_EPOCH
 
     redis_key = f"snowflake_seq:{passed_ms}"
-    sequence = cache.incr(redis_key, delta=1)
 
-    if sequence == 1:
-        cache.expire(redis_key, 1)
+    current_value = cache.get_or_set(redis_key, 0, timeout=1)
+
+    sequence = current_value + 1
+    cache.set(redis_key, sequence, timeout=1)
 
     sequence = (sequence - 1) & 4095
 
