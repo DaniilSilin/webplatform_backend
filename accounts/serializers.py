@@ -3,8 +3,7 @@ from rest_framework.serializers import SlugField, EmailField, CharField
 from rest_framework.validators import UniqueValidator
 
 from .validators import validate_username, check_password_complexity
-
-from .models import UserProfile
+from .models import UserProfile, UniversalVerification
 
 
 class VerifyEmailSerializer(serializers.ModelSerializer):
@@ -18,13 +17,34 @@ class VerifyEmailSerializer(serializers.ModelSerializer):
         return email.lower().strip()
 
 
+class CheckEmailVerifiedSerializer(serializers.ModelSerializer):
+    creation_id = CharField()
+
+    class Meta:
+        model = UniversalVerification
+        fields = [
+            "creation_id",
+        ]
+
+
+class CompleteEmailVerifySerializer(serializers.ModelSerializer):
+    creation_id = CharField()
+    secure_token = CharField()
+
+    class Meta:
+        model = UniversalVerification
+        fields = ["creation_id", "secure_token"]
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     # password = CharField()
     # token = CharField(write_only=True)
 
     class Meta:
         model = UserProfile
-        fields = ["email",]
+        fields = [
+            "email",
+        ]
 
     def validate_email(self, email):
         return email.lower().strip()
@@ -32,6 +52,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     # def validate(self, data):
     #     check_password_complexity(data.get("password"), data.get("username"))
     #     return data
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
 
