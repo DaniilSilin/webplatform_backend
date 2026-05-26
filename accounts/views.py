@@ -11,6 +11,8 @@ from .serializers import (
     CheckEmailVerifiedSerializer,
     CompleteEmailVerifySerializer,
     UserProfileSerializer,
+    CheckAccountNameAvailabilitySerializer,
+    CheckPasswordAvailabilitySerializer
 )
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -111,13 +113,32 @@ class CompleteEmailVerifyView(viewsets.ModelViewSet):
             )
 
 
+class CheckAccountNameAvailabilityView(viewsets.ModelViewSet):
+    serializer_class = CheckAccountNameAvailabilitySerializer
+    permission_classes = [AllowAny]
+
+    def list(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.data["username"]
+        pass
+
+
+class CheckPasswordAvailabilityView(viewsets.ModelViewSet):
+    serializer_class = CheckPasswordAvailabilitySerializer
+    permission_classes = [AllowAny]
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
 class RegisterView(viewsets.ModelViewSet):
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
         pass
-    
+
 
 class LoginView(TokenObtainPairView):
     serializer_class = TokenObtainPairSerializer

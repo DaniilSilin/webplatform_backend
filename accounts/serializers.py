@@ -36,6 +36,18 @@ class CompleteEmailVerifySerializer(serializers.ModelSerializer):
         fields = ["creation_id", "secure_token"]
 
 
+class CheckAccountNameAvailabilitySerializer(serializers.Serializer):
+    creation_id = CharField()
+    account_name = CharField()
+    count = CharField()
+
+
+class CheckPasswordAvailabilitySerializer(serializers.Serializer):
+    account_name = CharField()
+    password = CharField()
+    count = CharField()
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     # password = CharField()
     # token = CharField(write_only=True)
