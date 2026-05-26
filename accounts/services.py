@@ -62,27 +62,31 @@ def send_mail_on_email_verify(email: str, email_verify_link: str) -> None:
 
 
 def check_captcha(token: str, request) -> bool:
-    resp = requests.post(
-        "https://smartcaptcha.cloud.yandex.ru/validate",
-        data={
-            "secret": settings.SMARTCAPTCHA_SERVER_KEY,
-            "token": token,
-            "ip": get_client_ip(request),
-        },
-        timeout=1,
-    )
-    server_output = resp.content.decode()
-    if resp.status_code != 200:
-        print(
-            f"Allow access due to an error: code={resp.status_code}; message={server_output}",
-            file=sys.stderr,
+    try:
+        resp = requests.post(
+            "https://smartcaptcha.cloud.yandex.ru/validate",
+            data={
+                "secret": settings.SMARTCAPTCHA_SERVER_KEY,
+                "token": token,
+                "ip": get_client_ip(request),
+            },
+            timeout=1,
         )
+        server_output = resp.content.decode()
+        if resp.status_code != 200:
+            print(
+                f"Allow access due to an error: code={resp.status_code}; message={server_output}",
+                file=sys.stderr,
+            )
+            return True
+        return json.loads(server_output)["status"] == "ok"
+    except Exception as e:
+        print(f"Captcha request failed: {e}", file=sys.stderr)
         return True
-    return json.loads(server_output)["status"] == "ok"
-
-    # def generate_verification_code(email: str, purpose: str) -> str:
 
 
+
+# def generate_verification_code(email: str, purpose: str) -> str:
 #     email_codes_count = UniversalVerification.objects.filter(email=email, purpose=purpose).count()
 #     if (email_codes_count >= 50):
 #         UniversalVerification.objects.filter(email=email, purpose=purpose).last().delete()
